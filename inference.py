@@ -21,13 +21,14 @@ LABEL_IDX = 1
 
 app = Flask(__name__)
 
+
 with open(LABELS, 'rb') as pkl_file:
     labeled_words = pickle.load(pkl_file)
 with open(COUNT_VECTORIZER, 'rb') as pkl_file:
     cv = pickle.load(pkl_file)
 with open(VOCAB, 'rb') as pkl_file:
     vocab = pickle.load(pkl_file)
-
+nltk.download('punkt')
 
 def clean_data(data):
     """
