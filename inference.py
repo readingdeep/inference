@@ -7,9 +7,9 @@ import numpy as np
 import pandas as pd
 from flask import Flask, request
 
-LABELS = "/Users/leonardorosenberg/repos/itc-hackathon/inference/model/labeled_words.pkl"
-COUNT_VECTORIZER = "/Users/leonardorosenberg/repos/itc-hackathon/inference/model/count_vectorizer.pkl"
-VOCAB = "/Users/leonardorosenberg/repos/itc-hackathon/inference/model/vocab.pkl"
+LABELS = "model/labeled_words.pkl"
+COUNT_VECTORIZER = "model/count_vectorizer.pkl"
+VOCAB = "model/vocab.pkl"
 NEWLINE = '\n'
 EMPTY = ''
 REMOVE_PUNCTUATION = r'[^\w\s]'
