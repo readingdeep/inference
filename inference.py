@@ -1,14 +1,15 @@
 import json
-import pickle
 import os
+import pickle
+
 import nltk
 import numpy as np
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, request
 
-LABELS = "model/labeled_words.pkl"
-COUNT_VECTORIZER = "model/count_vectorizer.pkl"
-VOCAB = "model/vocab.pkl"
+LABELS = "/Users/leonardorosenberg/repos/itc-hackathon/inference/model/labeled_words.pkl"
+COUNT_VECTORIZER = "/Users/leonardorosenberg/repos/itc-hackathon/inference/model/count_vectorizer.pkl"
+VOCAB = "/Users/leonardorosenberg/repos/itc-hackathon/inference/model/vocab.pkl"
 NEWLINE = '\n'
 EMPTY = ''
 REMOVE_PUNCTUATION = r'[^\w\s]'
@@ -20,6 +21,13 @@ LABEL_IDX = 1
 
 app = Flask(__name__)
 
+with open(LABELS, 'rb') as pkl_file:
+    labeled_words = pickle.load(pkl_file)
+with open(COUNT_VECTORIZER, 'rb') as pkl_file:
+    cv = pickle.load(pkl_file)
+with open(VOCAB, 'rb') as pkl_file:
+    vocab = pickle.load(pkl_file)
+
 
 def clean_data(data):
     """
@@ -27,7 +35,7 @@ def clean_data(data):
     """
     df = data.copy()
     df = df.iloc[:, TEXT_IDX].str.replace(NEWLINE, EMPTY)
-    df = df.iloc[:, TEXT_IDX].str.replace(REMOVE_PUNCTUATION, EMPTY, regex=True).str.lower()
+    df = df.str.replace(REMOVE_PUNCTUATION, EMPTY, regex=True).str.lower()
     df = df.map(nltk.word_tokenize)
     return df
 
@@ -43,19 +51,21 @@ def replace_if_not_in_vocab(lst_token, vocab):
     return result
 
 
-@app.route('/predict', methods=['POST'])
-def predict(label, cv, vocab):
+@app.route('/', methods=['POST'])
+def predict():
+    # def predict(label, cv, vocab, paragraphs):
     params = json.loads(request.get_json())
+    # params = json.loads(paragraphs)
     X = pd.DataFrame(params)
     clean_X = clean_data(X)
     y_pred = np.zeros(clean_X.shape[0]).astype(str)
-    for i, row in clean_X.iterrows():
-        paragraph = WHITESPACE.join(replace_if_not_in_vocab(row))
+    for i, row in clean_X.items():
+        paragraph = WHITESPACE.join(replace_if_not_in_vocab(row, vocab))
         X_cv = cv.transform([paragraph]).toarray()
-        counter = label.iloc[:, :NUM_LABELS].values.T @ X_cv[ARRAY_INSIDE_ARRAY_IDX]
-        y_pred[i] = label.columns[np.argmax(counter)][LABEL_IDX]
+        counter = labeled_words.iloc[:, :NUM_LABELS].values.T @ X_cv[ARRAY_INSIDE_ARRAY_IDX]
+        y_pred[i] = labeled_words.columns[np.argmax(counter)][LABEL_IDX]
     response = y_pred.tolist()
-    return json.dumps(response)
+    return f"{json.dumps(response)}"
 
 
 def main():
@@ -70,15 +80,25 @@ def main():
         vocab = pickle.load(pkl_file)
 
     # Run flask
-    port = int(os.environ.get('PORT'))
-    # Running on Heroku
-    if port:
-        app.run(host='0.0.0.0', port=int(os.environ.get('PORT')))
+    try:
+        port = int(os.environ.get('PORT'))
+        # Running on Heroku
+        if port:
+            app.run(host='0.0.0.0', port=int(os.environ.get('PORT')))
     # Running locally
-    else:
+    except TypeError:
         app.run(host='0.0.0.0')
 
 
-
 if __name__ == '__main__':
+    # with open(LABELS, 'rb') as pkl_file:
+    #     labeled_words = pickle.load(pkl_file)
+    # with open(COUNT_VECTORIZER, 'rb') as pkl_file:
+    #     cv = pickle.load(pkl_file)
+    # with open(VOCAB, 'rb') as pkl_file:
+    #     vocab = pickle.load(pkl_file)
+    # df = pd.read_csv('/Users/leonardorosenberg/repos/itc-hackathon/inference/test/gutenberg_data.csv')
+    # paragraphs = df['text'].sample(4).to_json(orient='records')
+    # y_pred = predict(labeled_words, cv, vocab, paragraphs)
+    # print(y_pred)
     main()
