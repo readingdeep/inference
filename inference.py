@@ -60,7 +60,7 @@ def predict():
     # def predict(label, cv, vocab, paragraphs):
     req = request.get_json()
     print(req)
-    params = json.loads(req)
+    params = json.loads(fr"{req}")
     # params = json.loads(paragraphs)
     X = pd.DataFrame(params)
     clean_X = clean_data(X)
