@@ -78,7 +78,7 @@ def main():
         cv = pickle.load(pkl_file)
     with open(VOCAB, 'rb') as pkl_file:
         vocab = pickle.load(pkl_file)
-
+    nltk.download('punkt')
     # Run flask
     try:
         port = int(os.environ.get('PORT'))
