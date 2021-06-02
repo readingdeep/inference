@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
+import flask
 
 LABELS = "model/labeled_words.pkl"
 COUNT_VECTORIZER = "model/count_vectorizer.pkl"
@@ -58,7 +59,7 @@ def replace_if_not_in_vocab(lst_token, vocab):
 @app.route('/', methods=['POST'])
 def predict():
     # def predict(label, cv, vocab, paragraphs):
-    params = json.loads(request.get_json())
+    params = flask.json.loads(request.get_json())
     # params = json.loads(paragraphs)
     X = pd.DataFrame(params)
     clean_X = clean_data(X)
