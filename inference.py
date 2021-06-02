@@ -6,6 +6,7 @@ import nltk
 import numpy as np
 import pandas as pd
 from flask import Flask, request
+from flask_cors import CORS, cross_origin
 
 LABELS = "model/labeled_words.pkl"
 COUNT_VECTORIZER = "model/count_vectorizer.pkl"
@@ -20,7 +21,8 @@ ARRAY_INSIDE_ARRAY_IDX = 0
 LABEL_IDX = 1
 
 app = Flask(__name__)
-
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 with open(LABELS, 'rb') as pkl_file:
     labeled_words = pickle.load(pkl_file)
@@ -28,7 +30,7 @@ with open(COUNT_VECTORIZER, 'rb') as pkl_file:
     cv = pickle.load(pkl_file)
 with open(VOCAB, 'rb') as pkl_file:
     vocab = pickle.load(pkl_file)
-nltk.download('punkt')
+
 
 def clean_data(data):
     """
@@ -57,6 +59,8 @@ def predict():
     # def predict(label, cv, vocab, paragraphs):
     params = json.loads(request.get_json())
     # params = json.loads(paragraphs)
+    print(params)
+    print(type(params))
     X = pd.DataFrame(params)
     clean_X = clean_data(X)
     y_pred = np.zeros(clean_X.shape[0]).astype(str)
@@ -79,7 +83,7 @@ def main():
         cv = pickle.load(pkl_file)
     with open(VOCAB, 'rb') as pkl_file:
         vocab = pickle.load(pkl_file)
-    nltk.download('punkt')
+
     # Run flask
     try:
         port = int(os.environ.get('PORT'))
