@@ -23,6 +23,7 @@ LABEL_IDX = 1
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+nltk.download('punkt')
 
 with open(LABELS, 'rb') as pkl_file:
     labeled_words = pickle.load(pkl_file)
@@ -59,8 +60,6 @@ def predict():
     # def predict(label, cv, vocab, paragraphs):
     params = json.loads(request.get_json())
     # params = json.loads(paragraphs)
-    print(params)
-    print(type(params))
     X = pd.DataFrame(params)
     clean_X = clean_data(X)
     y_pred = np.zeros(clean_X.shape[0]).astype(str)
