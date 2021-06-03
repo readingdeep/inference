@@ -1,7 +1,7 @@
 import json
 import os
 import pickle
-
+import requests
 import nltk
 import numpy as np
 import pandas as pd
@@ -59,8 +59,11 @@ def replace_if_not_in_vocab(lst_token, vocab):
 def predict():
     # def predict(label, cv, vocab, paragraphs):
     req = request.get_json()
-    print(req)
-    params = json.loads(fr"{req}", strict=False)
+    try:
+        params = json.loads(fr"{req}", strict=False)
+    except json.decoder.JSONDecodeError:
+        req = json.dumps((req))
+        params = json.loads(fr"{req}", strict=False)
     # params = json.loads(paragraphs)
     X = pd.DataFrame(params)
     clean_X = clean_data(X)
